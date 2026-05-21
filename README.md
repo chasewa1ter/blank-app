@@ -1,19 +1,33 @@
-# 🎈 Blank app template
+# Baseball Computer Vision
 
-A simple Streamlit app template for you to modify!
+Multi-module CV analysis for baseball video. Streamlit UI with one page per module.
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-template.streamlit.app/)
+## Modules
 
-### How to run it on your own machine
+| Module | Camera view | Status |
+|---|---|---|
+| Route Efficiency | High home | UI scaffolded (MVP focus) |
+| Baserunner Lead + Pop Time | Behind 1B / overhead | Planned |
+| Bat Speed | Side view | Planned |
+| Barrel Contact Location | Center field | Planned |
 
-1. Install the requirements
+## Run locally
 
-   ```
-   $ pip install -r requirements.txt
-   ```
+```
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
 
-2. Run the app
+## Layout
 
-   ```
-   $ streamlit run streamlit_app.py
-   ```
+```
+streamlit_app.py       Landing page
+pages/                 One file per module (Streamlit multi-page)
+baseball_cv/           CV core: geometry, per-module metrics, plotting
+requirements.txt
+```
+
+The CV core exposes pure-function metrics and plotting. The Streamlit pages currently
+call mock generators so the UX is reviewable end-to-end; real detection/tracking
+(YOLOv8 + ByteTrack is the planned default) will be added per module as sample
+footage arrives.
