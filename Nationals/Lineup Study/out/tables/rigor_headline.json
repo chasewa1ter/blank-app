@@ -1,0 +1,97 @@
+{
+  "permutation": {
+    "real_best_shape": "PPCPPCCPC",
+    "real_best_slope": -0.08792313752189646,
+    "real_slope_A": -0.08155859835552481,
+    "null_best_mean": -0.06810898101900698,
+    "null_best_p05": -0.0960563144527315,
+    "null_best_p50": -0.06679575737708648,
+    "p_value_best": 0.117,
+    "p_value_A_vs_best_null": 0.205,
+    "p_value_A_vs_A_null": 0.001,
+    "n_perm": 1000,
+    "bonferroni_z": 3.896342532608549,
+    "null_A_sd": 0.027519901039552933,
+    "z_A_vs_A_null": -2.9636225158769594
+  },
+  "oos_pooled_A": {
+    "slope": 0.00015803611702959447,
+    "se": 0.003562643214652214
+  },
+  "oos_ivw_A": {
+    "slope": -0.0002483691928871432,
+    "se": 0.0035568614354767386
+  },
+  "oos_pooled_B": {
+    "slope": 0.003980866455312861,
+    "se": 0.0034323190422490112
+  },
+  "oos_ivw_B": {
+    "slope": 0.004896819380118767,
+    "se": 0.003419532818565747
+  },
+  "oos_pooled_C": {
+    "slope": -0.006118056633546649,
+    "se": 0.003321368590020351
+  },
+  "oos_ivw_C": {
+    "slope": -0.006821335324447665,
+    "se": 0.003301338089318854
+  },
+  "fe_A_1926 to 2025": {
+    "slope": 0.002841931856902958,
+    "se": 0.0043232094393334565
+  },
+  "fe_A_2026": {
+    "slope": -0.09242179924271952,
+    "se": 0.036864602438499074
+  },
+  "rank_A_2026_xwoba": 1,
+  "slope_A_2026_xwoba": -0.08482410904865817,
+  "markov": {
+    "2026": {
+      "lineups": 4855,
+      "mean_actual_runs": 4.481565396498455,
+      "markov_actual": 3.9739746593195666,
+      "markov_shapeA": 3.967623464078636,
+      "markov_best": 4.002256651453796,
+      "calibration": 1.1277287302244146,
+      "shapeA_minus_actual_per_game": -0.006351195240929499,
+      "shapeA_minus_actual_per_162": -1.0288936290305788,
+      "best_minus_actual_per_game": 0.028281992134230032,
+      "best_minus_actual_per_162": 4.5816827257452655,
+      "share_shapeA_beats_actual": 0.2708547888774459,
+      "mean_slots_moved": 3.267147270854789,
+      "markov_per_slot_toward_A": -0.0018207739231426285,
+      "markov_per_slot_toward_A_calibrated": -0.0020533390643713624,
+      "empirical_slope": -0.08155859835552558,
+      "empirical_se": 0.03519681833333547,
+      "markov_order_loss_slope": 0.00045728732341726645,
+      "markov_order_loss_se": 0.0004991106461810863,
+      "markov_total_slope_talent_adj": 3.131076498071113e-05,
+      "markov_total_slope_se": 0.003016566694361209
+    },
+    "1926 to 2025 sample": {
+      "lineups": 49995,
+      "mean_actual_runs": 4.489608960896089,
+      "markov_actual": 3.8204951102870846,
+      "markov_shapeA": 3.807463162106042,
+      "markov_best": 3.858401633649679,
+      "calibration": 1.175137994237277,
+      "shapeA_minus_actual_per_game": -0.013031948181042696,
+      "shapeA_minus_actual_per_162": -2.111175605328917,
+      "best_minus_actual_per_game": 0.03790652336259521,
+      "best_minus_actual_per_162": 6.140856784740424,
+      "share_shapeA_beats_actual": 0.19511951195119512,
+      "mean_slots_moved": 3.598159815981598,
+      "markov_per_slot_toward_A": -0.0034267898275807365,
+      "markov_per_slot_toward_A_calibrated": -0.004026950924655931,
+      "empirical_slope": -0.016146125908703846,
+      "empirical_se": 0.009959082595459407,
+      "markov_order_loss_slope": -0.0005070714694824818,
+      "markov_order_loss_se": 0.00017359371451650135,
+      "markov_total_slope_talent_adj": 0.005002580480787968,
+      "markov_total_slope_se": 0.0013329518061746851
+    }
+  }
+}

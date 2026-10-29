@@ -1,0 +1,11 @@
+raw/*
+!raw/manual/
+!raw/spotcheck_seasons.csv
+!raw/source_status.txt
+data/lineup_model.parquet
+data/lineup_model.csv
+data/lineups.csv
+data/player_seasons.csv
+data/games.csv
+out/recalc_tmp/
+__pycache__/

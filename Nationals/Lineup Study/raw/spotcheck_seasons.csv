@@ -1,0 +1,31 @@
+yearID,lgID,teamID,teamIDBR,teamIDretro,name
+1926,NL,CHN,CHC,CHN,Chicago Cubs
+1934,AL,CLE,CLE,CLE,Cleveland Indians
+1927,NL,PIT,PIT,PIT,Pittsburgh Pirates
+1939,NL,PHI,PHI,PHI,Philadelphia Phillies
+1940,AL,NYA,NYY,NYA,New York Yankees
+1936,NL,PIT,PIT,PIT,Pittsburgh Pirates
+1954,AL,CHA,CHW,CHA,Chicago White Sox
+1953,AL,SLA,SLB,SLA,St. Louis Browns
+1953,AL,BOS,BOS,BOS,Boston Red Sox
+1964,AL,NYA,NYY,NYA,New York Yankees
+1962,NL,SLN,STL,SLN,St. Louis Cardinals
+1957,AL,WS1,WSH,WS1,Washington Senators
+1975,AL,NYA,NYY,NYA,New York Yankees
+1967,NL,SFN,SFG,SFN,San Francisco Giants
+1973,NL,HOU,HOU,HOU,Houston Astros
+1983,NL,MON,MON,MON,Montreal Expos
+1982,AL,BAL,BAL,BAL,Baltimore Orioles
+1982,AL,DET,DET,DET,Detroit Tigers
+1992,NL,PHI,PHI,PHI,Philadelphia Phillies
+1992,NL,MON,MON,MON,Montreal Expos
+1994,NL,COL,COL,COL,Colorado Rockies
+1997,NL,NYN,NYM,NYN,New York Mets
+1998,NL,SLN,STL,SLN,St. Louis Cardinals
+1999,AL,KCA,KCR,KCA,Kansas City Royals
+2006,AL,TEX,TEX,TEX,Texas Rangers
+2014,NL,MIA,MIA,MIA,Miami Marlins
+2011,AL,CLE,CLE,CLE,Cleveland Indians
+2016,AL,BOS,BOS,BOS,Boston Red Sox
+2022,AL,NYA,NYY,NYA,New York Yankees
+2024,NL,COL,COL,COL,Colorado Rockies

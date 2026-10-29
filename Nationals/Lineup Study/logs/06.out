@@ -1,0 +1,4 @@
+2026-10-29 03:02:10 06_core_tests shape slopes 123 rows
+2026-10-29 03:02:50 06_core_tests win models done
+2026-10-29 03:03:08 06_core_tests 512 shapes done
+2026-10-29 03:03:13 06_core_tests core tests done in 67s: {'games_2026': 2429, 'lineups_2026': 4855, 'lineups_2026_all': 4855, 'slope_A_2026': -0.0815585983555255, 'se_A_2026': 0.03519681833333558, 'rank_A_2026': 3, 'slope_B_2026': -0.0700340771340312, 'se_B_2026': 0.026828143883440077, 'rank_B_2026': 12, 'slope_C_2026': 0.022662813945041015, 'se_C_2026': 0.026033526927851967, 'rank_C_2026': 369, 'exact_A_2026_G': 14, 'exact_A_2026_W': 11, 'exact_A_2026_L': 3, 'best_shape_2026': 'PPCPPCCPC'}

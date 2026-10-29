@@ -1,0 +1,4 @@
+2026-10-29 03:16:09 08_rigor permutation done: {'real_best_shape': 'PPCPPCCPC', 'real_best_slope': -0.08792313752189646, 'real_slope_A': -0.08155859835552481, 'null_best_mean': -0.06810898101900698, 'null_best_p05': -0.0960563144527315, 'null_best_p50': -0.06679575737708648, 'p_value_best': 0.117, 'p_value_A_vs_best_null': 0.205, 'p_value_A_vs_A_null': 0.001, 'n_perm': 1000, 'bonferroni_z': 3.896342532608549, 'null_A_sd': 0.027519901039552933, 'z_A_vs_A_null': -2.9636225158769594}
+2026-10-29 03:16:27 08_rigor out of sample done
+2026-10-29 03:16:31 08_rigor fixed effects and robustness done
+2026-10-29 03:16:51 08_rigor rigor done in 87s
