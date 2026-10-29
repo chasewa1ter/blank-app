@@ -1,18 +1,18 @@
 # Power vs contact batting order, 1926 to 2026
 
-**Verdict: Shape A (P P C C P C C P C) does not hold up: its 2026 edge is the kind of result that picking the best of 512 shapes in one season produces by chance, across 362,487 lineups from 1926 to 2025 it is worth 0.03 runs per 162 games per slot, in effect zero, and batting order on its own is worth well under one run per slot.**
+**Verdict: Shape A (P P C C P C C P C) does not hold up: its 2026 edge is what picking the best of 512 shapes in one season produces by chance; across 362,487 lineups from 1926 to 2025 it is worth 0.03 runs per 162 games per slot (in effect zero); and batting order on its own is worth well under one run per slot.**
 
 ## Is the shape real?
 
 * In 2026 each slot closer to shape A came with 13.2 more runs per 162 games than lineup talent predicted (SE 5.7). That is the pattern the shape was picked from. In this rebuild A ranked 3 of 512 shapes, B 12 and C 369.
 * Picking the best of 512 shapes inflates the winner. When P and C tags are shuffled among each team's own hitters, the best shuffled shape is at least as strong as the real 2026 best 12% of the time (1,000 shuffles). Shape A's t statistic of 2.3 is below the 3.9 bar that 512 tries require.
-* Every season from 1926 to 2025 is out of sample. There the effect is 0.03 runs per 162 per slot (SE 0.58), and the 95% interval runs from 1.1 runs gained to 1.2 runs lost for each slot closer to A. No decade gets past 1.3 SE, and comparing a team only with its own other games gives 0.46 runs per 162 per slot (against A).
+* Every season from 1926 to 2025 is out of sample. There the effect is 0.03 runs per 162 per slot (SE 0.58), and the 95% interval runs from 1.1 runs gained to 1.2 runs lost for each slot closer to A. No decade gets past 1.3 SE, and comparing a team only with its own other games gives 0.46 runs per 162 per slot (against A). Even the top of the interval, applied to a full switch of 4.5 slots, is worth about 5 runs, at or below the bottom of the 5 to 15 run benchmark for the whole order.
 
 ## How big in wins?
 
 * Taken at face value, 2026 says 1.32 wins per 162 per slot (10.0 runs per win). The average 2026 lineup sat 4.5 slots from A, so full adoption would be worth about 59 runs. The published research puts the gap between the best and a typical order at 5 to 15 runs for the whole order, so the 2026 number is several times too large to be a batting order effect.
-* History says 0.003 wins per 162 per slot. The win model over all 1926 to 2026 lineups gives 0.13 wins per 162 per slot (SE 0.11).
-* The Markov run model, which holds the nine hitters fixed and only changes the order, says the best possible order beats the order managers actually used by 5.2 runs per 162 in 2026 and 7.2 runs from 1926 to 2025, inside the 5 to 15 run benchmark. Rearranging the same hitters into shape A costs 1.2 runs per 162 in 2026. Per slot moved toward A the pure order effect is 0.33 runs per 162 (fewer), so the 2026 slope is about 40 times larger and points the other way. The 2026 result comes from which hitters were in the lineup and from chance, not from their order.
+* History says 0.003 wins per 162 per slot, in effect zero. The win model over all 1926 to 2026 lineups gives 0.13 more wins per 162 for each slot closer to A (SE 0.11), about 1.3 runs per slot, not distinguishable from zero and small next to the 5 to 15 run benchmark.
+* The Markov run model, which holds the nine hitters fixed and only changes the order, says the best possible order beats the order managers actually used by 5.2 runs per 162 in 2026 and 7.2 runs from 1926 to 2025, inside the 5 to 15 run benchmark. Rearranging the same hitters into shape A costs 1.2 runs per 162 in 2026. Each slot moved toward A costs 0.33 runs per 162 in pure order effect, so the 2026 slope is about 40 times larger and points the other way. The 2026 result comes from which hitters were in the lineup and from chance, not from their order.
 
 ## What a manager should do
 

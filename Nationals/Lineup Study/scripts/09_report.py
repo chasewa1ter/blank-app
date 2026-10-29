@@ -253,6 +253,26 @@ def workbook(H, tables):
                           "Runs over talent per G": "=({runs}{r}-{exp_runs}{r})/{games}{r}"},
                 formats={"Win pct": "0.000", "R per G": "0.00", "Runs over talent per G": "0.000", "exp_runs": "0.0"}, filt=False)
 
+    c0 = len(sl.columns) + 5 + len(b.columns) + 5
+    se_ = tables["slot_effects"]
+    write_table(ws, se_, start_col=c0, filt=False, formulas={"Runs per 162 (formula)": "={coef_P}{r}*162"},
+                formats={"p_share": "0.0%", "coef_P": "0.0000", "se": "0.0000", "Runs per 162 (formula)": "0.0"})
+    wmt = tables["win_models"]
+    write_table(ws, wmt, start_col=c0 + len(se_.columns) + 3, filt=False,
+                formats={c: "0.0000" for c in wmt.columns if c not in ("group_type", "group", "shape", "games")})
+
+    ws = wb.create_sheet("Rigor Tests")
+    oo = tables["oos"]
+    write_table(ws, oo, formulas={"Runs per 162 (formula)": "={slope}{r}*162", "Wins per 162 (formula)": "={slope}{r}*162/{runs_per_win}{r}"},
+                formats={c: "0.0000" for c in oo.columns if c not in ("test", "group", "shape", "lineups")} | {"Runs per 162 (formula)": "0.00", "Wins per 162 (formula)": "0.000"})
+    col = len(oo.columns) + 5
+    for key in ["fe", "robust", "split", "perm"]:
+        x = tables[key]
+        fm = {"Runs per 162 (formula)": "={slope}{r}*162"} if "slope" in x.columns else {}
+        write_table(ws, x, start_col=col, filt=False, formulas=fm,
+                    formats={c: "0.0000" for c in x.columns if x[c].dtype.kind == "f"} | {"Runs per 162 (formula)": "0.00"})
+        col += len(x.columns) + len(fm) + 3
+
     ws = wb.create_sheet("Order vs Composition")
     write_table(ws, tables["markov"], formulas={"Shape A minus actual per 162 (formula)": "={markov_shapeA}{r}*162-{markov_actual}{r}*162",
                                                  "Best minus actual per 162 (formula)": "={markov_best}{r}*162-{markov_actual}{r}*162",
@@ -289,6 +309,10 @@ def workbook(H, tables):
                 formats={"mean_dist_A": "0.00", "rot_g": "0.000", "pyth_w": "0.0", "w_minus_pyth": "0.0",
                          "Pythag W (formula)": "0.0", "W minus Pythag (formula)": "0.0", "Win pct": "0.000"})
 
+    tl = tables["team_reg"]
+    write_table(ws, tl, start_col=len(tables["teams"].columns) + 6, filt=False,
+                formats={"slope_per_slot": "0.0000", "se": "0.0000", "corr": "0.000"})
+
     ws = wb.create_sheet("Examples")
     write_table(ws, tables["examples"], formulas={"Win pct": "={W}{r}/({W}{r}+{L}{r})"}, formats={"Win pct": "0.000"})
     for c in range(1, 30):
@@ -296,6 +320,16 @@ def workbook(H, tables):
     for k in range(1, 10):
         col = list(tables["examples"].columns).index(f"slot{k}") + 1
         ws.column_dimensions[get_column_letter(col)].width = 44
+
+    ws = wb.create_sheet("Phase 7 Extras")
+    lp = tables["leadoff"]
+    write_table(ws, lp, formulas={"OBP vs all starters (formula)": "={OBP}{r}/{OBP_all_starters}{r}",
+                                  "SLG vs all starters (formula)": "={SLG}{r}/{SLG_all_starters}{r}"},
+                formats={c: "0.000" for c in lp.columns if c not in ("decade", "slot", "lineups")} | {
+                    "p_share": "0.0%", "OBP vs all starters (formula)": "0.000", "SLG vs all starters (formula)": "0.000"})
+    write_table(ws, tables["hand"], start_col=len(lp.columns) + 5, filt=False,
+                formulas={"Same hand pair runs per 162 (formula)": "={same_hand_pair_runs_per_game}{r}*162"},
+                formats={c: "0.0000" for c in tables["hand"].columns if c not in ("group", "lineups")} | {"Same hand pair runs per 162 (formula)": "0.00"})
 
     ws = wb.create_sheet("Validation and Method")
     write_table(ws, tables["method"])
@@ -439,12 +473,24 @@ def build_tables(H, R):
                  R["rank_A_2026_xwoba"], None, "Other value = rank of 512", "out/tables/shapes_2026_xwoba.csv"))
     summary = pd.DataFrame(S)
     shapes = t("all_512_shapes")
+    rk = shapes[shapes["shape"].isin(SHAPES.values())].copy()
+    rk["name"] = rk["shape"].map({v: k for k, v in SHAPES.items()})
+    best = shapes.sort_values("slope").groupby("group").head(1).set_index("group")
+    rk["best_shape_in_group"] = rk.group.map(best["shape"])
+    rk["best_slope_in_group"] = rk.group.map(best["slope"])
+    rk.to_csv(TAB / "shape_ranks.csv", index=False)
     ex = t("exact_shapes")
     ex["flag"] = ""
     for gname, x in ex[ex.G >= 100].groupby("group"):
         top = x.sort_values("win_pct", ascending=False)
         ex.loc[top.head(10).index, "flag"] = "Top 10 at 100+ games"
         ex.loc[top.tail(5).index, "flag"] = "Bottom 5 at 100+ games"
+    tb = []
+    for gname, x in ex[ex.G >= 100].groupby("group"):
+        top = x.sort_values("win_pct", ascending=False)
+        tb.append(top.head(10).assign(list="Top 10"))
+        tb.append(top.tail(5).assign(list="Bottom 5"))
+    pd.concat(tb).to_csv(TAB / "exact_shapes_top_bottom.csv", index=False)
     ex = ex.drop(columns=["win_pct", "r_g", "ra_g", "rot_g"])
     teams = t("team_seasons").drop(columns=["team_season"])
     examples = t("examples")
@@ -467,6 +513,10 @@ def build_tables(H, R):
               ("Full detail", "VALIDATION.md, DECISIONS.md, PROBLEMS.md and README.md in the study folder.")]
     method = pd.DataFrame(method, columns=["Item", "Detail"])
     return {"summary": summary, "slopes": sl, "buckets": t("distance_buckets"), "markov": mk, "shapes": shapes, "exact": ex,
+            "leadoff": t("leadoff_two_profiles"), "hand": t("handedness"), "slot_effects": t("slot_effects"),
+            "win_models": t("win_models"), "oos": o, "fe": fe, "robust": rb, "split": t("out_of_sample_split"),
+            "perm": pd.DataFrame([{"Item": k, "Value": v} for k, v in perm.items()]).astype({"Value": str}),
+            "team_reg": t("team_level_regressions"),
             "trends": t("trends_by_slot_decade"), "dist": t("distance_by_decade"), "teams": teams, "examples": examples, "method": method}
 
 
@@ -491,8 +541,8 @@ def report_text(H, R, T):
     c26 = card[card.group == "2026"].set_index("slot")
     lineups_h = int(oo.lineups)
     A = "P P C C P C C P C"
-    verdict = (f"Shape A ({A}) does not hold up: its 2026 edge is the kind of result that picking the best of 512 shapes in one season produces by chance, "
-               f"across {lineups_h:,} lineups from 1926 to 2025 it is worth {abs(oa):.2f} runs per 162 games per slot, in effect zero, and batting order on its own is worth well under one run per slot.")
+    verdict = (f"Shape A ({A}) does not hold up: its 2026 edge is what picking the best of 512 shapes in one season produces by chance; "
+               f"across {lineups_h:,} lineups from 1926 to 2025 it is worth {abs(oa):.2f} runs per 162 games per slot (in effect zero); and batting order on its own is worth well under one run per slot.")
     H["verdict"] = verdict
     lines = [
         "# Power vs contact batting order, 1926 to 2026", "",
@@ -500,12 +550,12 @@ def report_text(H, R, T):
         "## Is the shape real?", "",
         f"* In 2026 each slot closer to shape A came with {abs(a26):.1f} more runs per 162 games than lineup talent predicted (SE {se26:.1f}). That is the pattern the shape was picked from. In this rebuild A ranked {H['rank_A_2026']} of 512 shapes, B {H['rank_B_2026']} and C {H['rank_C_2026']}.",
         f"* Picking the best of 512 shapes inflates the winner. When P and C tags are shuffled among each team's own hitters, the best shuffled shape is at least as strong as the real 2026 best {perm['p_value_best']:.0%} of the time ({perm['n_perm']:,} shuffles). Shape A's t statistic of {abs(H['slope_A_2026'] / H['se_A_2026']):.1f} is below the {perm['bonferroni_z']:.1f} bar that 512 tries require.",
-        f"* Every season from 1926 to 2025 is out of sample. There the effect is {abs(oa):.2f} runs per 162 per slot (SE {ose:.2f}), and the 95% interval runs from {abs(lo):.1f} runs {'gained' if lo < 0 else 'lost'} to {abs(hi):.1f} runs {'lost' if hi > 0 else 'gained'} for each slot closer to A. No decade gets past {max_t:.1f} SE, and comparing a team only with its own other games gives {abs(fh.slope * 162):.2f} runs per 162 per slot ({'against' if fh.slope > 0 else 'for'} A).",
+        f"* Every season from 1926 to 2025 is out of sample. There the effect is {abs(oa):.2f} runs per 162 per slot (SE {ose:.2f}), and the 95% interval runs from {abs(lo):.1f} runs {'gained' if lo < 0 else 'lost'} to {abs(hi):.1f} runs {'lost' if hi > 0 else 'gained'} for each slot closer to A. No decade gets past {max_t:.1f} SE, and comparing a team only with its own other games gives {abs(fh.slope * 162):.2f} runs per 162 per slot ({'against' if fh.slope > 0 else 'for'} A). Even the top of the interval, applied to a full switch of {mean_dist26:.1f} slots, is worth about {max(abs(lo), abs(hi)) * mean_dist26:.0f} runs, at or below the bottom of the 5 to 15 run benchmark for the whole order.",
         "",
         "## How big in wins?", "",
         f"* Taken at face value, 2026 says {abs(a26) / rpw26:.2f} wins per 162 per slot ({rpw26:.1f} runs per win). The average 2026 lineup sat {mean_dist26:.1f} slots from A, so full adoption would be worth about {abs(a26) * mean_dist26:.0f} runs. The published research puts the gap between the best and a typical order at 5 to 15 runs for the whole order, so the 2026 number is several times too large to be a batting order effect.",
-        f"* History says {abs(oa) / oo.runs_per_win:.3f} wins per 162 per slot. The win model over all 1926 to 2026 lineups gives {abs(w_all.lpm_wins_per_162):.2f} wins per 162 per slot (SE {w_all.lpm_se_wins_per_162:.2f}).",
-        f"* The Markov run model, which holds the nine hitters fixed and only changes the order, says the best possible order beats the order managers actually used by {m26.best_minus_actual_per_162 * m26.calibration:.1f} runs per 162 in 2026 and {mh.best_minus_actual_per_162 * mh.calibration:.1f} runs from 1926 to 2025, inside the 5 to 15 run benchmark. Rearranging the same hitters into shape A {'costs' if m26.shapeA_minus_actual_per_game < 0 else 'adds'} {abs(m26.shapeA_minus_actual_per_game * m26.calibration * 162):.1f} runs per 162 in 2026. Per slot moved toward A the pure order effect is {abs(per_slot26):.2f} runs per 162 ({'fewer' if per_slot26 < 0 else 'more'}), so the 2026 slope is about {ratio:.0f} times larger and points the other way. The 2026 result comes from which hitters were in the lineup and from chance, not from their order.",
+        f"* History says {abs(oa) / oo.runs_per_win:.3f} wins per 162 per slot, in effect zero. The win model over all 1926 to 2026 lineups gives {abs(w_all.lpm_wins_per_162):.2f} {'more' if w_all.lpm_wins_per_162 < 0 else 'fewer'} wins per 162 for each slot closer to A (SE {w_all.lpm_se_wins_per_162:.2f}), about {abs(w_all.lpm_wins_per_162) * w_all.runs_per_win:.1f} runs per slot, not distinguishable from zero and small next to the 5 to 15 run benchmark.",
+        f"* The Markov run model, which holds the nine hitters fixed and only changes the order, says the best possible order beats the order managers actually used by {m26.best_minus_actual_per_162 * m26.calibration:.1f} runs per 162 in 2026 and {mh.best_minus_actual_per_162 * mh.calibration:.1f} runs from 1926 to 2025, inside the 5 to 15 run benchmark. Rearranging the same hitters into shape A {'costs' if m26.shapeA_minus_actual_per_game < 0 else 'adds'} {abs(m26.shapeA_minus_actual_per_game * m26.calibration * 162):.1f} runs per 162 in 2026. Each slot moved toward A {'costs' if per_slot26 < 0 else 'adds'} {abs(per_slot26):.2f} runs per 162 in pure order effect, so the 2026 slope is about {ratio:.0f} times larger and points the other way. The 2026 result comes from which hitters were in the lineup and from chance, not from their order.",
         "",
         "## What a manager should do", "",
         "* Do not set lineups by a power and contact pattern. No shape, A, B or C, moves runs by more than about one run per 162 per slot in 100 years of games.",
@@ -575,6 +625,113 @@ def dash_issues(text):
     return bad
 
 
+def html_page(H, R):
+    lib = ROOT / "raw" / "plotly" / "package" / "plotly.min.js"
+    if not lib.exists():
+        return False
+    b = t("distance_buckets")
+    order = ["0 to 1", "2", "3", "4", "5+"]
+    lines = []
+    for g, c in [(ERAS[0], NAVY), (ERAS[1], "#3F6DB5"), (ERAS[2], "#7FA3D9"), (ERAS[3], GREY), ("2026", RED)]:
+        x = b[b.group == g].set_index("bucket").reindex(order)
+        lines.append({"type": "scatter", "mode": "lines+markers", "name": g, "x": ["0 to 1", "2", "3", "4", "5 or more"],
+                      "y": [round(v, 4) for v in x.rot], "customdata": [int(v) for v in x.games.fillna(0)],
+                      "line": {"color": c, "width": 5 if g == "2026" else 3}, "marker": {"size": 11},
+                      "hovertemplate": "%{x} slots off A<br>%{y:.3f} runs over talent per game<br>%{customdata:,} games<extra>" + g + "</extra>"})
+    o = t("out_of_sample")
+    d = o[(o.test == "oos_decade") & (o["shape"] == "A")]
+    comb = o[(o.test == "oos_pooled") & (o["shape"] == "A")].iloc[0]
+    sh = t("all_512_shapes")
+    s26 = sh[(sh.group == "2026") & (sh["shape"] == SHAPES["A"])].iloc[0]
+    dec = {"x": [g.replace("2020s", "2020 to 2025") for g in d.group] + ["2026"],
+           "y": [round(-v * 162, 2) for v in d.slope] + [round(-s26.slope * 162, 2)],
+           "e": [round(1.96 * v * 162, 2) for v in d.se] + [round(1.96 * s26.se * 162, 2)],
+           "band": [round(-(comb.slope + 1.96 * comb.se) * 162, 2), round(-(comb.slope - 1.96 * comb.se) * 162, 2)]}
+    tr = t("trends_by_slot_decade")
+    tr.loc[tr.lineups * (1 - tr.x_share) < 500, "p_share"] = np.nan
+    pv = tr.pivot(index="decade", columns="slot", values="p_share") * 100
+    heat = {"z": [[None if np.isnan(v) else round(v, 1) for v in row] for row in pv.values], "y": [x.replace("2020s", "2020 to 26") for x in pv.index]}
+    mk = t("markov_summary").set_index("group")
+    md = {"obs": [round(-mk.loc["2026", "empirical_slope"] * 162, 2), round(-comb.slope * 162, 2)],
+          "obs_e": [round(1.96 * mk.loc["2026", "empirical_se"] * 162, 2), round(1.96 * comb.se * 162, 2)],
+          "mk": [round(mk.loc[g, "markov_per_slot_toward_A_calibrated"] * 162, 2) for g in ["2026", "1926 to 2025 sample"]]}
+    null = t("permutation_null")
+    perm = R["permutation"]
+    pe = {"null": [round(-v * 162, 3) for v in null.best_slope], "best": round(-perm["real_best_slope"] * 162, 2),
+          "a": round(-perm["real_slope_A"] * 162, 2), "p": perm["p_value_best"]}
+    data = json.dumps({"lines": lines, "dec": dec, "heat": heat, "md": md, "pe": pe, "navy": NAVY, "red": RED})
+    rep = (OUT / "REPORT.md").read_text()
+    verdict = re.search(r"\*\*Verdict: (.*)\*\*", rep).group(1)
+    html = f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lineup Shape Study</title>
+<style>
+:root {{ --navy: {NAVY}; --red: {RED}; --ink: #1A1A1A; --muted: #5F6670; --bg: #FFFFFF; --rule: #E3E6EA; }}
+body {{ margin: 0; background: var(--bg); color: var(--ink); font-family: Arial, Helvetica, sans-serif; }}
+main {{ max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }}
+h1 {{ color: var(--navy); font-size: 30px; margin: 8px 0 12px; }}
+h2 {{ color: var(--navy); font-size: 22px; margin: 36px 0 4px; border-top: 1px solid var(--rule); padding-top: 24px; }}
+p {{ font-size: 16px; line-height: 1.5; max-width: 820px; }}
+.verdict {{ border-left: 6px solid var(--red); padding: 10px 16px; background: #F6F7F9; font-size: 17px; }}
+.note {{ color: var(--muted); font-size: 13px; }}
+.chart {{ width: 100%; height: 480px; }}
+</style></head><body><main>
+<h1>Power vs contact batting order, 1926 to 2026</h1>
+<p class="verdict">{verdict}</p>
+<h2>1. Runs over talent by distance to shape A, by era</h2>
+<p>Each line shows how many runs a lineup scored above what its talent, the opposing starter, the opponent and the park predicted, grouped by how many slots differ from P P C C P C C P C. Hover for the number of games.</p>
+<div id="c1" class="chart"></div>
+<h2>2. Shape A by decade, out of sample</h2>
+<p>Runs gained per 162 games for each slot a lineup sits closer to shape A. Bars are 95% intervals with standard errors clustered by team season; the shaded band is the pooled 1926 to 2025 interval.</p>
+<div id="c2" class="chart"></div>
+<h2>3. Where managers put power lean hitters</h2>
+<p>Share of P tagged starters at each slot, by decade. Slot 9 before 1970 was almost always the pitcher and is left blank.</p>
+<div id="c3" class="chart"></div>
+<h2>4. Observed effect vs pure batting order effect</h2>
+<p>The Markov run model holds the nine hitters fixed and only changes their order, so it isolates what order itself is worth.</p>
+<div id="c4" class="chart"></div>
+<h2>5. How often chance alone finds a 2026 winner this strong</h2>
+<p>P and C tags were shuffled 1,000 times among each 2026 team's own hitters, and the best of 512 shapes was kept from each shuffle.</p>
+<div id="c5" class="chart"></div>
+<p class="note">Built by scripts/09_report.py from the tables in out/tables. Sources: Retrosheet game logs (Chadwick Bureau mirror), Lahman database 2026 edition, public mirrors of the MLB Stats API feed for 2026.</p>
+</main>
+<script>{lib.read_text()}</script>
+<script>
+const D = {data};
+const base = {{font: {{family: "Arial, Helvetica, sans-serif", size: 15, color: "#1A1A1A"}}, paper_bgcolor: "#FFFFFF", plot_bgcolor: "#FFFFFF",
+  margin: {{l: 70, r: 20, t: 20, b: 60}}, hoverlabel: {{font: {{size: 14}}}}}};
+const cfg = {{responsive: true, displaylogo: false}};
+const ax = (t) => ({{title: {{text: t}}, zeroline: true, zerolinecolor: "#000", gridcolor: "#EEF0F3"}});
+Plotly.newPlot("c1", D.lines, {{...base, xaxis: {{title: {{text: "Slots that differ from shape A"}}, type: "category"}}, yaxis: ax("Runs over talent per game"), legend: {{orientation: "h", y: -0.25}}}}, cfg);
+const n = D.dec.x.length;
+Plotly.newPlot("c2", [
+  {{type: "scatter", mode: "markers", x: D.dec.x, y: D.dec.y, error_y: {{type: "data", array: D.dec.e, thickness: 4, width: 0}},
+    marker: {{size: 16, color: D.dec.x.map((v) => v === "2026" ? D.red : D.navy)}},
+    hovertemplate: "%{{x}}<br>%{{y:.1f}} runs per 162 per slot<extra></extra>"}}],
+  {{...base, showlegend: false, xaxis: {{type: "category"}}, yaxis: ax("Runs gained per 162, per slot closer to A"),
+    shapes: [{{type: "rect", xref: "paper", x0: 0, x1: 1, y0: D.dec.band[0], y1: D.dec.band[1], fillcolor: D.navy, opacity: 0.12, line: {{width: 0}}}}]}}, cfg);
+Plotly.newPlot("c3", [{{type: "heatmap", z: D.heat.z, y: D.heat.y, x: ["1","2","3","4","5","6","7","8","9"], zmin: 0, zmax: 100,
+  colorscale: [[0, "#FFFFFF"], [1, D.navy]], texttemplate: "%{{z:.0f}}", hovertemplate: "%{{y}}, slot %{{x}}: %{{z:.1f}}% P<extra></extra>",
+  colorbar: {{title: {{text: "% P"}}}}}}],
+  {{...base, margin: {{l: 100, r: 20, t: 20, b: 60}}, xaxis: {{title: {{text: "Batting order slot"}}, type: "category"}}, yaxis: {{autorange: "reversed", type: "category"}}}}, cfg);
+Plotly.newPlot("c4", [
+  {{type: "bar", name: "Observed runs over talent per slot closer to A", x: ["2026", "1926 to 2025"], y: D.md.obs, marker: {{color: D.navy}},
+    error_y: {{type: "data", array: D.md.obs_e, thickness: 3}}, hovertemplate: "%{{y:.2f}} runs per 162<extra></extra>"}},
+  {{type: "bar", name: "Markov: pure order effect per slot moved to A", x: ["2026", "1926 to 2025"], y: D.md.mk, marker: {{color: D.red}},
+    hovertemplate: "%{{y:.2f}} runs per 162<extra></extra>"}}],
+  {{...base, barmode: "group", xaxis: {{type: "category"}}, yaxis: ax("Runs gained per 162, per slot"), legend: {{orientation: "h", y: -0.2}}}}, cfg);
+Plotly.newPlot("c5", [{{type: "histogram", x: D.pe.null, nbinsx: 40, marker: {{color: D.navy}}, hovertemplate: "%{{x}} runs per 162: %{{y}} shuffles<extra></extra>"}}],
+  {{...base, showlegend: false, xaxis: {{title: {{text: "Best shape per shuffle, runs per 162 per slot"}}}}, yaxis: {{title: {{text: "Shuffles"}}}},
+    shapes: [{{type: "line", x0: D.pe.best, x1: D.pe.best, yref: "paper", y0: 0, y1: 1, line: {{color: D.red, width: 4}}}},
+             {{type: "line", x0: D.pe.a, x1: D.pe.a, yref: "paper", y0: 0, y1: 1, line: {{color: D.red, width: 3, dash: "dash"}}}}],
+    annotations: [{{x: D.pe.best, yref: "paper", y: 1, text: "real 2026 best: " + D.pe.best, showarrow: false, xanchor: "left", font: {{color: D.red}}}},
+                  {{x: D.pe.a, yref: "paper", y: 0.9, text: "shape A: " + D.pe.a, showarrow: false, xanchor: "right", font: {{color: D.red}}}}]}}, cfg);
+</script></body></html>
+"""
+    (OUT / "interactive_charts.html").write_text(html)
+    return True
+
+
 def main():
     t0 = time.time()
     H = json.loads((TAB / "headline.json").read_text())
@@ -611,6 +768,7 @@ def main():
     log(f"workbook recalc {rc.get('status', rc)} total_formulas {rc.get('total_formulas')} errors {rc.get('total_errors')} scan errors {errs} empty tabs {empty}")
     (TAB / "workbook_check.json").write_text(json.dumps({"recalc": rc, "error_cells_scan": errs, "empty_tabs": empty,
                                                          "tabs": [ws.title for ws in wb.worksheets]}, indent=2, default=str))
+    log(f"interactive page written: {html_page(H, R)}")
     issues = {f: dash_issues((OUT / f).read_text()) for f in ["REPORT.md", "SLIDES.md", "VALIDATION.md"]}
     log(f"dash issues: { {k: len(v) for k, v in issues.items()} }; checks ok {int(checks.ok.sum())} of {len(checks)}; in {time.time() - t0:.0f}s")
     (TAB / "dash_check.json").write_text(json.dumps(issues, indent=2))

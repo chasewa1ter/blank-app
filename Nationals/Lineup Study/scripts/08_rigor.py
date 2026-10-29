@@ -276,8 +276,49 @@ def manager_card():
     return pd.DataFrame(rows)
 
 
+def extras():
+    cols = ["season", "decade", "era", "dh_game", "pattern", "dist_A", "rot", "team_season"]
+    cols += [f"s{k}_{c}" for k in range(1, 10) for c in ["bats", "OBP", "SLG", "K_pct"]]
+    lu = pd.read_parquet(DATA / "lineup_model.parquet", columns=cols)
+    nx, nn = lu.pattern.str.count("X"), lu.pattern.str.count("N")
+    lu = lu[((nx == 0) | ((nx == 1) & ~lu.dh_game)) & (nn == 0)].copy()
+    b = lu[[f"s{k}_bats" for k in range(1, 10)]].fillna("").to_numpy()
+    same = np.zeros(len(lu))
+    for k in range(8):
+        same += (b[:, k] == b[:, k + 1]) & np.isin(b[:, k], ["L", "R"])
+    lu["same_hand_pairs"] = same
+    rows = []
+    for g, d in [("1926 to 2025", lu[lu.season <= 2025]), ("2026", lu[lu.season == 2026])] + [(e, lu[lu.era == e]) for e in ERAS]:
+        b0, se0 = slope(d, "dist_A")
+        b1, se1 = slope(d, "dist_A", controls=["same_hand_pairs"])
+        bh, seh = slope(d, "same_hand_pairs", controls=["dist_A"])
+        rows.append({"group": g, "lineups": len(d), "mean_same_hand_pairs": d.same_hand_pairs.mean(),
+                     "slope_A_no_control": b0, "se_A_no_control": se0, "slope_A_with_hand_control": b1,
+                     "se_A_with_hand_control": se1, "same_hand_pair_runs_per_game": bh, "same_hand_pair_se": seh,
+                     "same_hand_pair_runs_per_162": bh * 162})
+    pd.DataFrame(rows).to_csv(TAB / "handedness.csv", index=False)
+    lu["decade_label"] = lu.decade.astype(str) + "s"
+    prof = []
+    for dec, x in lu.groupby("decade_label"):
+        pat = np.array([list(p) for p in x.pattern])
+        nonx = pat != "X"
+        allv = {c: np.nanmean(np.where(nonx, x[[f"s{k}_{c}" for k in range(1, 10)]].to_numpy(float), np.nan)) for c in ["OBP", "SLG", "K_pct"]}
+        for k in (1, 2):
+            r = {"decade": dec, "slot": k, "lineups": len(x), "p_share": (pat[:, k - 1] == "P").mean()}
+            for c in ["OBP", "SLG", "K_pct"]:
+                v = x[f"s{k}_{c}"].where(pat[:, k - 1] != "X").mean()
+                r[c] = v
+                r[f"{c}_all_starters"] = allv[c]
+                r[f"{c}_vs_all"] = v / allv[c]
+            prof.append(r)
+    pd.DataFrame(prof).to_csv(TAB / "leadoff_two_profiles.csv", index=False)
+    log("extras done: handedness and leadoff profiles")
+
+
 def main():
     t0 = time.time()
+    if not (TAB / "handedness.csv").exists():
+        extras()
     if (TAB / "rigor_headline.json").exists():
         log("outputs exist, skipping")
         return

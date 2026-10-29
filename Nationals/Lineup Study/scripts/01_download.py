@@ -141,6 +141,23 @@ def blocked_sources():
     status.write_text("\n".join(lines) + "\n")
 
 
+def plotly():
+    dest = RAW / "plotly"
+    if (dest / "package" / "plotly.min.js").exists():
+        return
+    dest.mkdir(exist_ok=True)
+    url = "https://registry.npmjs.org/plotly.js-dist-min/-/plotly.js-dist-min-2.35.2.tgz"
+    r = requests.get(url, timeout=120)
+    if r.status_code != 200:
+        problem(f"plotly download failed: HTTP {r.status_code}")
+        return
+    (dest / "plotly.tgz").write_bytes(r.content)
+    import tarfile
+    with tarfile.open(dest / "plotly.tgz") as t:
+        t.extract("package/plotly.min.js", dest, filter="data")
+    log("plotly.js 2.35.2 downloaded")
+
+
 def main():
     t0 = time.time()
     for d in ["raw", "data", "out", "logs"]:
@@ -151,6 +168,7 @@ def main():
     retrosheet(spot)
     register()
     feeds()
+    plotly()
     log(f"done in {time.time() - t0:.0f}s")
 
 

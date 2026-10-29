@@ -24,13 +24,13 @@ Python 3 with pandas, numpy, statsmodels, scipy, matplotlib, openpyxl, pyarrow, 
 
 ## Data sources
 
-The container this ran in could not reach retrosheet.org, statsapi.mlb.com, baseballsavant.mlb.com, baseball-reference.com or seanlahman.com, so every source is a public GitHub mirror. See `DECISIONS.md` for each choice and `PROBLEMS.md` for what was blocked.
+The container this ran in could not reach `retrosheet.org`, `statsapi.mlb.com`, `baseballsavant.mlb.com`, `baseball-reference.com` or `seanlahman.com`, so every source is a public GitHub mirror. See `DECISIONS.md` for each choice and `PROBLEMS.md` for what was blocked.
 
-* Retrosheet game logs and event files: github.com/chadwickbureau/retrosheet (the information used here was obtained free of charge from and is copyrighted by Retrosheet, www.retrosheet.org).
-* Lahman database 2026 edition (1871 to 2025): github.com/cdalzell/Lahman, the Lahman R package.
-* Chadwick register for MLBAM to Retrosheet IDs: github.com/chadwickbureau/register.
-* 2026 pitch by pitch MLB Stats API live feed: github.com/lancebroz/mlb-pitcher-data.
-* 2026 box score summaries from the Stats API: github.com/toolstem/daily-box-score.
+* Retrosheet game logs and event files: `github.com/chadwickbureau/retrosheet` (the information used here was obtained free of charge from and is copyrighted by Retrosheet, www.retrosheet.org).
+* Lahman database 2026 edition (1871 to 2025): `github.com/cdalzell/Lahman`, the Lahman R package.
+* Chadwick register for MLBAM to Retrosheet IDs: `github.com/chadwickbureau/register`.
+* 2026 pitch by pitch MLB Stats API live feed: `github.com/lancebroz/mlb-pitcher-data`.
+* 2026 box score summaries from the Stats API: `github.com/toolstem/daily-box-score`.
 * 2026 final standings (wins and losses only), read from the Baseball Reference standings page through a web search: `raw/manual/standings_2026_websearch.csv`.
 
 ## Folder layout
