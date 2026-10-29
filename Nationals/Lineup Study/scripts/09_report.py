@@ -25,8 +25,8 @@ SHAPES = {"A": "PPCCPCCPC", "B": "PCPCPCCPC", "C": "CPCPCCPCP"}
 ERAS = ["Pre DH 1926 to 1972", "AL DH 1973 to 2021", "NL non DH 1973 to 2021", "Universal DH 2022 to 2026"]
 RECALC = Path("/root/.claude/skills/synced/ad1eab3c-92fc-4b58-a820-0eb12a50d243_a877aaed-fea2-4a65-ae0c-016ae19c1431/xlsx/scripts/recalc.py")
 
-plt.rcParams.update({"font.size": 24, "axes.titlesize": 34, "axes.labelsize": 28, "xtick.labelsize": 24,
-                     "ytick.labelsize": 24, "legend.fontsize": 22, "axes.spines.top": False, "axes.spines.right": False,
+plt.rcParams.update({"font.size": 30, "axes.titlesize": 40, "axes.labelsize": 32, "xtick.labelsize": 30,
+                     "ytick.labelsize": 30, "legend.fontsize": 28, "axes.spines.top": False, "axes.spines.right": False,
                      "figure.facecolor": "white", "axes.facecolor": "white", "savefig.facecolor": "white"})
 
 
@@ -46,25 +46,25 @@ def fig():
 
 
 def foot(f, text):
-    f.text(0.01, 0.015, text, fontsize=16, color=GREY)
+    f.text(0.01, 0.012, text, fontsize=19, color=GREY)
 
 
 def chart_a(b):
     f = fig()
-    ax = f.add_axes([0.09, 0.14, 0.62, 0.72])
+    ax = f.add_axes([0.09, 0.18, 0.56, 0.68])
     order = ["0 to 1", "2", "3", "4", "5+"]
     styles = [(ERAS[0], NAVY, "o", "-"), (ERAS[1], "#3F6DB5", "s", "-"), (ERAS[2], "#7FA3D9", "^", "-"),
               (ERAS[3], GREY, "D", "-"), ("2026", RED, "o", "-")]
     for g, c, m, ls in styles:
         x = b[b.group == g].set_index("bucket").reindex(order)
         lw = 6 if g == "2026" else 4
-        ax.plot(range(5), x.rot, color=c, marker=m, ms=16, lw=lw, ls=ls, label=g)
+        ax.plot(range(5), x.rot, color=c, marker=m, ms=16, lw=lw, ls=ls, label=g.replace("non DH", "no DH"))
     ax.axhline(0, color="black", lw=1.5)
     ax.set_xticks(range(5), ["0 to 1", "2", "3", "4", "5 or more"])
     ax.set_xlabel("Slots that differ from shape A (P P C C P C C P C)")
     ax.set_ylabel("Runs over talent per game")
-    ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5), frameon=False)
-    f.suptitle("Lineups closest to shape A scored more only in 2026", x=0.09, ha="left", fontsize=36, fontweight="bold")
+    ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5), frameon=False, fontsize=26)
+    f.suptitle("Lineups closest to shape A scored more only in 2026", x=0.09, ha="left", fontsize=44, fontweight="bold")
     foot(f, "Runs over talent = actual runs minus a within season model of runs on lineup talent, opposing starter, opponent runs allowed, home and park.")
     f.savefig(OUT / "chart_a_runs_over_talent_by_distance.png")
     plt.close(f)
@@ -74,7 +74,7 @@ def chart_b(o, s26):
     d = o[(o.test == "oos_decade") & (o["shape"] == "A")].copy()
     comb = o[(o.test == "oos_pooled") & (o["shape"] == "A")].iloc[0]
     f = fig()
-    ax = f.add_axes([0.09, 0.17, 0.88, 0.69])
+    ax = f.add_axes([0.11, 0.17, 0.86, 0.69])
     x = np.arange(len(d))
     v = -d.slope * 162
     se162 = d.se * 162
@@ -90,11 +90,12 @@ def chart_b(o, s26):
     labels = [g.replace("2020s", "2020\nto 2025") for g in d.group] + ["2026"]
     ax.set_xticks(list(x) + [xr], labels)
     ax.set_ylim(-12, 28)
-    ax.set_ylabel("Runs gained per 162 games\nper slot closer to A")
-    ax.text(xr - 0.25, v26, "the season\nA was\npicked in", color=RED, ha="right", va="center", fontsize=22)
-    ax.text(-0.3, 22, f"1926 to 2025 pooled: {abs(comb.slope * 162):.2f} runs per 162 per slot (shaded band: 95% interval)", color=NAVY, fontsize=22)
-    f.suptitle("Out of sample, shape A is worth nothing in every decade", x=0.09, ha="left", fontsize=36, fontweight="bold")
-    foot(f, "Above zero = lineups closer to shape A scored more than talent predicts. Thick bars: plus or minus 1 SE; thin bars: 95% interval. SE clustered by team season.")
+    ax.set_ylabel("Runs per 162, per slot closer to A")
+    ax.tick_params(axis="x", labelsize=26)
+    ax.text(xr - 0.25, v26, "the season\nA was\npicked in", color=RED, ha="right", va="center", fontsize=28)
+    ax.text(-0.3, 22, f"1926 to 2025 pooled: {abs(comb.slope * 162):.2f} runs per 162 per slot", color=NAVY, fontsize=28)
+    f.suptitle("Out of sample, shape A is worth nothing", x=0.11, ha="left", fontsize=44, fontweight="bold")
+    foot(f, "Above zero = closer to A scored more than talent predicts. Thick bars: 1 SE. Thin bars and band: 95% interval, clustered by team season.")
     f.savefig(OUT / "chart_b_shapeA_slope_by_decade.png")
     plt.close(f)
 
@@ -104,14 +105,14 @@ def chart_c(tr):
     tr.loc[tr.lineups * (1 - tr.x_share) < 500, "p_share"] = np.nan
     p = tr.pivot(index="decade", columns="slot", values="p_share") * 100
     f = fig()
-    ax = f.add_axes([0.12, 0.15, 0.80, 0.71])
+    ax = f.add_axes([0.12, 0.18, 0.80, 0.68])
     cmap = LinearSegmentedColormap.from_list("nav", ["#FFFFFF", NAVY])
     cmap.set_bad("#EEEEEE")
     ax.imshow(np.ma.masked_invalid(p.values), cmap=cmap, vmin=0, vmax=100, aspect="auto")
     for i in range(p.shape[0]):
         for j in range(p.shape[1]):
             v = p.values[i, j]
-            ax.text(j, i, "pitcher" if np.isnan(v) else f"{v:.0f}", ha="center", va="center", fontsize=22 if not np.isnan(v) else 18,
+            ax.text(j, i, "pitcher" if np.isnan(v) else f"{v:.0f}", ha="center", va="center", fontsize=30 if not np.isnan(v) else 22,
                     color=GREY if np.isnan(v) else ("white" if v > 55 else "black"))
     for j, c in enumerate(SHAPES["A"]):
         if c == "P":
@@ -120,7 +121,7 @@ def chart_c(tr):
     ax.set_yticks(range(p.shape[0]), [d.replace("2020s", "2020 to 26") for d in p.index])
     ax.set_xlabel("Batting order slot (red outline = P slot in shape A)")
     ax.spines[:].set_visible(False)
-    f.suptitle("Share of power lean hitters (P) by slot, percent", x=0.12, ha="left", fontsize=36, fontweight="bold")
+    f.suptitle("Share of power lean hitters (P) by slot, percent", x=0.12, ha="left", fontsize=44, fontweight="bold")
     foot(f, "P = SLG percentile above contact percentile within that season. Pitchers batting left out; grey = fewer than 500 non pitchers in that slot.")
     f.savefig(OUT / "chart_c_power_share_heatmap.png")
     plt.close(f)
@@ -141,23 +142,23 @@ def chart_d(mk, fe):
     ax.errorbar(x - w / 2, ev, yerr=1.96 * es, fmt="none", ecolor="black", elinewidth=3, capsize=10)
     ax.bar(x + w / 2, mv, w, color=RED, label="Markov model: pure batting order effect per slot moved to A")
     for xi, v, e in zip(x - w / 2, ev, es):
-        ax.text(xi + 0.03, v + 1.96 * e + 0.4 if v >= 0 else 1.96 * e + 0.4, f"{abs(v):.1f}" if abs(v) >= 0.05 else "0.0", ha="left", va="bottom", fontsize=28, color=NAVY, fontweight="bold")
+        ax.text(xi + 0.03, v + 1.96 * e + 0.4 if v >= 0 else 1.96 * e + 0.4, f"{abs(v):.1f}" if abs(v) >= 0.05 else "0.0", ha="left", va="bottom", fontsize=34, color=NAVY, fontweight="bold")
     for xi, v in zip(x + w / 2, mv):
-        ax.text(xi, v - 0.5, f"{abs(v):.2f} {'lost' if v < 0 else 'gained'}", ha="center", va="top", fontsize=26, color=RED, fontweight="bold")
+        ax.text(xi, v - 0.5, f"{abs(v):.2f} {'lost' if v < 0 else 'gained'}", ha="center", va="top", fontsize=32, color=RED, fontweight="bold")
     ax.axhline(0, color="black", lw=1.5)
     ax.set_ylim(-4, 27)
     ax.set_xticks(x, labels)
     ax.set_ylabel("Runs gained per 162 games, per slot")
     ax.legend(loc="upper right", frameon=False)
-    f.suptitle("Batting order alone is worth a fraction of a run per slot", x=0.10, ha="left", fontsize=36, fontweight="bold")
-    foot(f, "Observed: 95% interval, SE clustered by team season; history uses all 1926 to 2025 lineups. Markov: all 2026 lineups and a 50,000 lineup sample, scaled to actual run levels.")
+    f.suptitle("Batting order alone is worth a fraction of a run per slot", x=0.10, ha="left", fontsize=44, fontweight="bold")
+    foot(f, "Observed: 95% interval, SE clustered by team season, all lineups. Markov: all 2026 lineups and 50,000 sampled, scaled to actual runs.")
     f.savefig(OUT / "chart_d_empirical_vs_markov.png")
     plt.close(f)
 
 
 def chart_e(null, perm):
     f = fig()
-    ax = f.add_axes([0.09, 0.15, 0.88, 0.69])
+    ax = f.add_axes([0.09, 0.18, 0.88, 0.66])
     ax.hist(-null.best_slope * 162, bins=40, color=NAVY, alpha=0.85)
     rb, ra = -perm["real_best_slope"] * 162, -perm["real_slope_A"] * 162
     ax.axvline(rb, color=RED, lw=6)
@@ -165,12 +166,12 @@ def chart_e(null, perm):
     top = ax.get_ylim()[1] * 1.3
     ax.set_ylim(0, top)
     box = dict(facecolor="white", edgecolor="none", alpha=0.9)
-    ax.text(rb + 0.3, top * 0.98, f"real 2026 best of 512\n{rb:.1f} runs per 162", color=RED, fontsize=22, va="top", ha="left", bbox=box)
-    ax.text(ra - 0.3, top * 0.98, f"shape A\n{ra:.1f} runs per 162", color=RED, fontsize=22, va="top", ha="right", bbox=box)
+    ax.text(rb + 0.3, top * 0.98, f"real 2026 best of 512\n{rb:.1f} runs per 162", color=RED, fontsize=28, va="top", ha="left", bbox=box)
+    ax.text(ra - 0.3, top * 0.98, f"shape A\n{ra:.1f} runs per 162", color=RED, fontsize=28, va="top", ha="right", bbox=box)
     ax.set_xlabel("Best shape in each shuffle: runs gained per 162 per slot closer to it")
     ax.set_ylabel("Shuffles")
     pv = perm["p_value_best"]
-    f.suptitle(f"Shuffled tags find a 2026 winner this strong {pv:.0%} of the time", x=0.09, ha="left", fontsize=36, fontweight="bold")
+    f.suptitle(f"Chance finds a 2026 winner this strong {pv:.0%} of the time", x=0.05, ha="left", fontsize=44, fontweight="bold")
     foot(f, f"{perm['n_perm']:,} shuffles of P and C tags among each 2026 team's own hitters; the best of 512 shapes is kept from each shuffle.")
     f.savefig(OUT / "chart_e_permutation_null.png")
     plt.close(f)
